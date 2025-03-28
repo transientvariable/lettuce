@@ -10,9 +10,9 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/transientvariable/fs"
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/fs-go"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/support-go"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

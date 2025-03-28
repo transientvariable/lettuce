@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 )
 
 const (

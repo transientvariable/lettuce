@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/net/http"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/net-go/http"
+	"github.com/transientvariable/support-go"
 
 	json "github.com/json-iterator/go"
 	gohttp "net/http"

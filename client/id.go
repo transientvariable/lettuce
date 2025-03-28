@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 )
 
 const (

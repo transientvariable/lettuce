@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/log-go"
 
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/webdav"

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/transientvariable/fs"
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/fs-go"
+	"github.com/transientvariable/log-go"
 
 	"golang.org/x/net/webdav"
 

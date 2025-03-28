@@ -7,10 +7,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/transientvariable/fs"
+	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/lettuce/cluster/filer"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/log-go"
 )
 
 type dirEntry struct {

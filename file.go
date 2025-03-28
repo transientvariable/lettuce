@@ -7,10 +7,10 @@ import (
 	"io"
 	"sync"
 
-	"github.com/transientvariable/fs"
+	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/lettuce/chunk"
 	"github.com/transientvariable/lettuce/cluster/filer"
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/log-go"
 
 	weedsprt "github.com/transientvariable/lettuce/support"
 	gofs "io/fs"

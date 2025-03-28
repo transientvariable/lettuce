@@ -3,7 +3,7 @@ package volume
 import (
 	"fmt"
 
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 )
 
 // Needle represents volume data for a single file ID.

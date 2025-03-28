@@ -9,7 +9,7 @@ import (
 
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/log-go"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

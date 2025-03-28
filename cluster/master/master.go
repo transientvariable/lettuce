@@ -10,8 +10,8 @@ import (
 
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/master_pb"
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"

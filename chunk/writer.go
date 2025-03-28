@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/net/http"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/net-go/http"
 	"github.com/valyala/bytebufferpool"
 
 	weedsprt "github.com/transientvariable/lettuce/support"

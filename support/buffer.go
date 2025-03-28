@@ -1,7 +1,7 @@
 package support
 
 import (
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 
 	pool "github.com/libp2p/go-buffer-pool"
 )

@@ -14,7 +14,7 @@ import (
 	"github.com/transientvariable/lettuce/cluster/master"
 	"github.com/transientvariable/lettuce/cluster/volume"
 	"github.com/transientvariable/log"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 
 	gofs "io/fs"
 )

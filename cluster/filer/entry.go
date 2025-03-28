@@ -9,7 +9,7 @@ import (
 	"github.com/transientvariable/lettuce/chunk"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 
 	json "github.com/json-iterator/go"
 )

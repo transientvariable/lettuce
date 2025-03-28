@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/transientvariable/collection"
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/net/http"
+	"github.com/transientvariable/collection-go"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/net-go/http"
 
 	"github.com/valyala/bytebufferpool"
 

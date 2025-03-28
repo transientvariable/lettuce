@@ -1,7 +1,7 @@
 package filer
 
 import (
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/support-go"
 
 	gofs "io/fs"
 )

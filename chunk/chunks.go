@@ -7,11 +7,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/transientvariable/collection"
-	"github.com/transientvariable/collection/list"
+	"github.com/transientvariable/collection-go"
+	"github.com/transientvariable/collection-go/list"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/support-go"
 )
 
 // OnAdd defines the signature for the function to call when new chunks are add to Chunks.

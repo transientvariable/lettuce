@@ -8,7 +8,7 @@ import (
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/cluster/filer"
 	"github.com/transientvariable/lettuce/cluster/volume"
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/log-go"
 )
 
 const (

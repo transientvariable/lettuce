@@ -11,8 +11,8 @@ import (
 
 	"github.com/transientvariable/config"
 	"github.com/transientvariable/configpath"
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/net/grpc"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/net-go/grpc"
 
 	"github.com/cenkalti/backoff/v4"
 

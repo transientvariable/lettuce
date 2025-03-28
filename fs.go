@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/transientvariable/fs"
+	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/cluster"
 	"github.com/transientvariable/lettuce/cluster/filer"
-	"github.com/transientvariable/log"
-	"github.com/transientvariable/net/http"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/log-go"
+	"github.com/transientvariable/net-go/http"
+	"github.com/transientvariable/support-go"
 
 	gofs "io/fs"
 	gohttp "net/http"

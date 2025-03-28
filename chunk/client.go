@@ -3,8 +3,8 @@ package chunk
 import (
 	"sync"
 
-	"github.com/transientvariable/net/http"
-	"github.com/transientvariable/support"
+	"github.com/transientvariable/net-go/http"
+	"github.com/transientvariable/support-go"
 
 	gohttp "net/http"
 )
