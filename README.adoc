@@ -1,5 +1,5 @@
 = lettuce
-Matt Nicholls <transientvariable@gmail.com>
+Matt Nicholls <transientvariable@protonmail.com>
 :keywords: golang,object storage,file system,fs,seaweedfs,s3,webdav
 :experimental: true
 :icons: font

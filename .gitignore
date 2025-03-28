@@ -1,0 +1,100 @@
+# Build configuration and output directories
+# ---------------------------------------------
+pb_data/
+vendor/
+scratch/
+bin/
+build/
+target/
+.out
+
+# Eclipse/STS
+# ---------------------------------------------
+.apt_generated
+.classpath
+.factorypath
+.metadata
+.project
+.settings
+.springBeans
+
+# JetBrains
+# ---------------------------------------------
+*.iml
+*.ipr
+*.iws
+.idea
+atlassian-ide-plugin.xml
+out
+
+# NetBeans
+# ---------------------------------------------
+.nb-gradle/
+.nbattrs
+nbbuild/
+nbdist/
+nbproject/private/
+
+# VSCode
+# ---------------------------------------------
+.vscode
+
+# Editor Files
+# ---------------------------------------------
+*~
+*.swp
+
+# Packages, Archives, etc.
+# ---------------------------------------------
+# It is better to unpack these files and commit the
+# raw source git has its own built in compression methods
+*.7z
+*.dmg
+*.iso
+*.rar
+*.tar
+*.zip
+
+# Compiled source
+# ---------------------------------------------
+*.class
+*.com
+*.dll
+*.exe
+*.o
+*.so
+
+# Logs and databases
+# ---------------------------------------------
+*.log
+logs
+
+# OS generated files
+# ---------------------------------------------
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Infrastructure
+# ---------------------------------------------
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Development
+# ---------------------------------------------
+.env
+.run
+go.work
+go.work.sum
+error.log
+file-manifest*
