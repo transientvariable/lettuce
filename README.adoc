@@ -1,0 +1,37 @@
+= lettuce
+Matt Nicholls <transientvariable@gmail.com>
+:keywords: golang,object storage,file system,fs,seaweedfs,s3,webdav
+:experimental: true
+:icons: font
+:iconfont-cdn: //cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/fontawesome.min.css
+:imagesdir: docs/image
+:sectanchors: true
+:source-highlighter: prettify
+:toc: left
+:toclevels: 3
+:toc-title: Contents
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Overview
+
+Go file system interface implementation for link:https://github.com/seaweedfs/seaweedfs[SeaweedFS].
+
+== Installation
+
+.Prerequisites
+* The link:https://golang.org/dl/[Golang Runtime], version 1.24.x or later
+
+[source%nowrap,bash]
+----
+❯ go get -u github.com/transientvariable/lettuce
+----
+
+== License
+This project is licensed under the link:LICENSE[MIT License].
