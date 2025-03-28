@@ -19,6 +19,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+CAUTION: WIP
+
 == Overview
 
 Go file system interface implementation for link:https://github.com/seaweedfs/seaweedfs[SeaweedFS].
