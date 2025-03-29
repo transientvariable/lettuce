@@ -1,4 +1,4 @@
-package seaweedfs
+package lettuce
 
 import (
 	"context"

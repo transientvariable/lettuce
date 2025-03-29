@@ -7,13 +7,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/transientvariable/config"
-	"github.com/transientvariable/configpath"
+	"github.com/transientvariable/config-go"
+	"github.com/transientvariable/lettuce"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/cluster/filer"
 	"github.com/transientvariable/lettuce/cluster/master"
 	"github.com/transientvariable/lettuce/cluster/volume"
-	"github.com/transientvariable/log"
+	"github.com/transientvariable/log-go"
 	"github.com/transientvariable/support-go"
 
 	gofs "io/fs"
@@ -36,7 +36,7 @@ func New(options ...func(*Cluster)) (*Cluster, error) {
 	}
 
 	if c.master == nil {
-		addr := config.ValueMustResolve(configpath.SeaweedFSClusterMasterAddr)
+		addr := config.ValueMustResolve(lettuce.SeaweedFSClusterMasterAddr)
 
 		log.Warn("[cluster] master client not provided, creating default...")
 
@@ -48,7 +48,7 @@ func New(options ...func(*Cluster)) (*Cluster, error) {
 	}
 
 	if c.filer == nil {
-		addr := config.ValueMustResolve(configpath.SeaweedFSClusterFilerAddr)
+		addr := config.ValueMustResolve(lettuce.SeaweedFSClusterFilerAddr)
 
 		log.Warn("[cluster] filer client not provided, creating default...")
 

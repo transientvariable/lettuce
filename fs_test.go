@@ -1,6 +1,6 @@
 //go:build integration
 
-package seaweedfs
+package lettuce
 
 import (
 	"fmt"
