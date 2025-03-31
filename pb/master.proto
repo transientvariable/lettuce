@@ -1,3 +1,6 @@
+// modified version of master.proto from https://github.com/seaweedfs/seaweedfs/tree/master/weed/pb that only modifies
+// the go_package namespace
+
 syntax = "proto3";
 
 package master_pb;

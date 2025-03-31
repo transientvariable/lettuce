@@ -1,3 +1,6 @@
+// modified version of remote.proto from https://github.com/seaweedfs/seaweedfs/tree/master/weed/pb that only modifies
+// the go_package namespace
+
 syntax = "proto3";
 
 package remote_pb;

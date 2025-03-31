@@ -1,3 +1,5 @@
+// unmodified copy of message.fbs from https://github.com/seaweedfs/seaweedfs/tree/master/weed/pb needed for compilation
+
 table NameValue {
     name:string (key);
     value:string;

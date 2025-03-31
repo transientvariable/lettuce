@@ -1,3 +1,6 @@
+// modified version of iam.proto from https://github.com/seaweedfs/seaweedfs/tree/master/weed/pb that only modifies
+// the go_package namespace
+
 syntax = "proto3";
 
 package iam_pb;
