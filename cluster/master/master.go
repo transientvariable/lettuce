@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/master_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -147,7 +147,7 @@ func (m *Master) String() string {
 		"port":     m.id.Port(),
 	}
 	s["grpc_address"] = m.GRPCAddr()
-	return string(support.ToJSONFormatted(s))
+	return string(anchor.ToJSONFormatted(s))
 }
 
 func master(addr string) (*Master, error) {

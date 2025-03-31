@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc/status"
 )
@@ -42,7 +42,7 @@ func (f *Filer) Update(ctx context.Context, entry *Entry) error {
 		Signatures: []int32{f.signature},
 	}
 
-	log.Trace(fmt.Sprintf("[filer] update request: \n%s", support.ToJSONFormatted(req)))
+	log.Trace(fmt.Sprintf("[filer] update request: \n%s", anchor.ToJSONFormatted(req)))
 
 	resp, err := f.PB().UpdateEntry(ctx, req)
 	if err != nil {

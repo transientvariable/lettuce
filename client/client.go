@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/transientvariable/anchor/net/grpc"
 	"github.com/transientvariable/config-go"
 	"github.com/transientvariable/lettuce"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/net-go/grpc"
 
 	"github.com/cenkalti/backoff/v4"
 

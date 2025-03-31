@@ -1,7 +1,7 @@
 package filer
 
 import (
-	"github.com/transientvariable/support-go"
+	"github.com/transientvariable/anchor"
 
 	gofs "io/fs"
 )
@@ -36,5 +36,5 @@ func (r Root) String() string {
 	if r.entry.PB() != nil && r.entry.PB().GetAttributes() != nil {
 		s["mode"] = gofs.FileMode(r.entry.PB().GetAttributes().GetFileMode()).String()
 	}
-	return string(support.ToJSONFormatted(map[string]any{"root": s}))
+	return string(anchor.ToJSONFormatted(map[string]any{"root": s}))
 }

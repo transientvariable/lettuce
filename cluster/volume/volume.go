@@ -7,10 +7,10 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/volume_server_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -146,7 +146,7 @@ func (v *Volume) String() string {
 		"port":     v.id.Port(),
 	}
 	s["grpc_address"] = v.GRPCAddr()
-	return string(support.ToJSONFormatted(s))
+	return string(anchor.ToJSONFormatted(s))
 }
 
 func volume(addr string) (*Volume, error) {

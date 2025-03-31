@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/transientvariable/support-go"
+	"github.com/transientvariable/anchor"
 )
 
 const (
@@ -28,7 +28,7 @@ func NewID(addr string, options ...func(*ID)) (ID, error) {
 		return ID{}, &Error{Err: errors.New("address is required for ID")}
 	}
 
-	if !support.URISchemePattern.MatchString(addr) {
+	if !anchor.URISchemePattern.MatchString(addr) {
 		addr = HTTPURIScheme + "://" + addr
 	}
 
@@ -88,7 +88,7 @@ func (i ID) Port() string {
 
 // String returns a string representation of the ID.
 func (i ID) String() string {
-	return string(support.ToJSONFormatted(map[string]any{
+	return string(anchor.ToJSONFormatted(map[string]any{
 		"id": map[string]any{
 			"hostname": i.Hostname(),
 			"name":     i.Name(),

@@ -3,8 +3,8 @@ package chunk
 import (
 	"sync"
 
-	"github.com/transientvariable/net-go/http"
-	"github.com/transientvariable/support-go"
+	"github.com/transientvariable/anchor"
+	"github.com/transientvariable/anchor/net/http"
 
 	gohttp "net/http"
 )
@@ -17,8 +17,8 @@ var (
 func httpClient() *gohttp.Client {
 	once.Do(func() {
 		t := http.DefaultTransport()
-		t.ReadBufferSize = support.MiB
-		t.WriteBufferSize = support.MiB
+		t.ReadBufferSize = anchor.MiB
+		t.WriteBufferSize = anchor.MiB
 		c = http.NewClient()
 		c.Transport = t
 	})

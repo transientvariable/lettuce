@@ -9,10 +9,10 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -38,7 +38,7 @@ type Config struct {
 
 // String returns a string representation of the Config.
 func (c Config) String() string {
-	return string(support.ToJSONFormatted(c))
+	return string(anchor.ToJSONFormatted(c))
 }
 
 // Filer represents a connection to a SeaweedFS filer server.
@@ -220,7 +220,7 @@ func (f *Filer) String() string {
 		r["mode"] = gofs.FileMode(f.root.Entry().PB().GetAttributes().GetFileMode()).String()
 	}
 	s["root"] = r
-	return string(support.ToJSONFormatted(s))
+	return string(anchor.ToJSONFormatted(s))
 }
 
 func (f *Filer) path(name string) (Path, error) {

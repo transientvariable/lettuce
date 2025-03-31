@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/master_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc/status"
 
@@ -44,7 +44,7 @@ func (m *Master) FindVolumes(ctx context.Context, collection string, fileID stri
 
 	var addrs []url.URL
 	for _, l := range resp.GetVolumeIdLocations()[0].GetLocations() {
-		if support.URISchemePattern.MatchString(l.GetUrl()) {
+		if anchor.URISchemePattern.MatchString(l.GetUrl()) {
 			u, err := url.Parse(l.GetUrl())
 			if err != nil {
 				return nil, fmt.Errorf("master: %w", err)
@@ -80,7 +80,7 @@ func (m *Master) VolumeAddresses(ctx context.Context) ([]url.URL, error) {
 	}
 	encodedAddrs := client.EncodeAddrs(addrs...)
 
-	log.Trace(fmt.Sprintf("[master] volumeAddresses: %s\n", support.ToJSONFormatted(encodedAddrs)))
+	log.Trace(fmt.Sprintf("[master] volumeAddresses: %s\n", anchor.ToJSONFormatted(encodedAddrs)))
 
 	return encodedAddrs, nil
 }

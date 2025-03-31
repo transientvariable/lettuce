@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/chunk"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/support-go"
 
 	json "github.com/json-iterator/go"
 )
@@ -23,7 +23,7 @@ type Collection struct {
 
 // String returns a string representation of the Collection.
 func (c Collection) String() string {
-	return string(support.ToJSONFormatted(c))
+	return string(anchor.ToJSONFormatted(c))
 }
 
 // Entry is a container for file and directory metadata managed by a SeaweedFS filer.
@@ -176,7 +176,7 @@ func (e *Entry) String() string {
 	s["path"] = e.Path().String()
 	s["is_dir"] = e.IsDir()
 	s["size"] = e.Size()
-	return string(support.ToJSONFormatted(s))
+	return string(anchor.ToJSONFormatted(s))
 }
 
 func (e *Entry) update(chunks *chunk.Chunks) error {

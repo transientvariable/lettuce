@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc/status"
 )
@@ -35,7 +35,7 @@ func (f *Filer) Remove(ctx context.Context, name string) (*Entry, error) {
 		req.IsRecursive = true
 	}
 
-	log.Trace(fmt.Sprintf("[filer] remove request: %s", support.ToJSONFormatted(req)))
+	log.Trace(fmt.Sprintf("[filer] remove request: %s", anchor.ToJSONFormatted(req)))
 
 	resp, err := f.PB().DeleteEntry(ctx, req)
 	if err != nil {

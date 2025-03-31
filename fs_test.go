@@ -12,7 +12,7 @@ import (
 
 	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
+	"github.com/transientvariable/anchor"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -88,7 +88,7 @@ func (t *SeaweedFSTestSuite) SetupTest() {
 	}
 	t.filePaths = filePaths
 
-	log.Info(fmt.Sprintf("[seaweedfs_test:setup] file paths:\n%s", support.ToJSONFormatted(t.filePaths)))
+	log.Info(fmt.Sprintf("[seaweedfs_test:setup] file paths:\n%s", anchor.ToJSONFormatted(t.filePaths)))
 }
 
 func TestSeaweedFSTestSuite(t *testing.T) {
@@ -96,7 +96,7 @@ func TestSeaweedFSTestSuite(t *testing.T) {
 }
 
 func (t *SeaweedFSTestSuite) TestFS() {
-	log.Info(fmt.Sprintf("[seaweedfs_test] filePaths: %s\n", support.ToJSONFormatted(t.filePaths)))
+	log.Info(fmt.Sprintf("[seaweedfs_test] filePaths: %s\n", anchor.ToJSONFormatted(t.filePaths)))
 
 	assert.NoError(t.T(), fstest.TestFS(t.seaweedfs, t.filePaths...))
 }

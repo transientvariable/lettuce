@@ -3,13 +3,13 @@ package chunk
 import (
 	"errors"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/support-go"
 )
 
 const (
 	// Size defines the default size for a chunk buffer.
-	Size = 4 * support.MiB
+	Size = 4 * anchor.MiB
 )
 
 // Chunk is a container that represents part of the content for a file.
@@ -78,7 +78,7 @@ func (c Chunk) ToMap() map[string]any {
 
 // String returns a string representation of the Chunk.
 func (c Chunk) String() string {
-	return string(support.ToJSON(c.ToMap()))
+	return string(anchor.ToJSON(c.ToMap()))
 }
 
 // WithPosition sets the pos of the Chunk relative to others for a single object.

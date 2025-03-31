@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/config-go"
 	"github.com/transientvariable/lettuce"
 	"github.com/transientvariable/lettuce/client"
@@ -14,7 +15,6 @@ import (
 	"github.com/transientvariable/lettuce/cluster/master"
 	"github.com/transientvariable/lettuce/cluster/volume"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	gofs "io/fs"
 )
@@ -149,7 +149,7 @@ func (c *Cluster) String() string {
 		}
 		s["volumes"] = volConfigs
 	}
-	return string(support.ToJSONFormatted(map[string]any{"cluster": s}))
+	return string(anchor.ToJSONFormatted(map[string]any{"cluster": s}))
 }
 
 func (c *Cluster) prepareVolumes() (map[client.ID]*volume.Volume, error) {

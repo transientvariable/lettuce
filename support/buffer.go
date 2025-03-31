@@ -1,14 +1,14 @@
 package support
 
 import (
-	"github.com/transientvariable/support-go"
+	"github.com/transientvariable/anchor"
 
 	pool "github.com/libp2p/go-buffer-pool"
 )
 
 const (
 	// bufferSize defines the default size for a buffer.
-	bufferSizeMax = 4 * support.MiB
+	bufferSizeMax = 4 * anchor.MiB
 )
 
 var (

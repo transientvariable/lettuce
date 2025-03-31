@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc/status"
 
@@ -51,7 +51,7 @@ func (f *Filer) Rename(ctx context.Context, oldpath string, newpath string) erro
 		NewName:      np.Name(),
 	}
 
-	log.Trace(fmt.Sprintf("[filer] rename request: \n%s", support.ToJSONFormatted(req)))
+	log.Trace(fmt.Sprintf("[filer] rename request: \n%s", anchor.ToJSONFormatted(req)))
 
 	resp, err := f.PB().AtomicRenameEntry(ctx, req)
 	if err != nil {

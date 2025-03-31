@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/transientvariable/anchor"
+	"github.com/transientvariable/anchor/net/http"
 	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/cluster"
 	"github.com/transientvariable/lettuce/cluster/filer"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/net-go/http"
-	"github.com/transientvariable/support-go"
 
 	gofs "io/fs"
 	gohttp "net/http"
@@ -392,7 +392,7 @@ func (s *SeaweedFS) String() string {
 		m["file"] = e
 	}
 	m["root"] = s.cluster.Filer().Root().Entry()
-	return string(support.ToJSONFormatted(m))
+	return string(anchor.ToJSONFormatted(m))
 }
 
 func (s *SeaweedFS) path() (string, error) {

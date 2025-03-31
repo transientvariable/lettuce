@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/transientvariable/anchor"
+	"github.com/transientvariable/anchor/net/http"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
-	"github.com/transientvariable/net-go/http"
-	"github.com/transientvariable/support-go"
 
 	json "github.com/json-iterator/go"
 	gohttp "net/http"
@@ -52,7 +52,7 @@ func (u UploadResult) FileChunk(fileId string, offset int64, tsNs int64) (*filer
 
 // String returns a string representation of the UploadResult.
 func (u UploadResult) String() string {
-	return string(support.ToJSONFormatted(u))
+	return string(anchor.ToJSONFormatted(u))
 }
 
 func decodeUploadResponse(resp *gohttp.Response) (UploadResult, error) {

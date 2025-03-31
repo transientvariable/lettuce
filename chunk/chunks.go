@@ -7,11 +7,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/transientvariable/collection-go"
-	"github.com/transientvariable/collection-go/list"
+	"github.com/transientvariable/anchor"
+	"github.com/transientvariable/hold"
+	"github.com/transientvariable/hold/list"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 )
 
 // OnAdd defines the signature for the function to call when new chunks are add to Chunks.
@@ -125,12 +125,10 @@ func (c *Chunks) Clear() {
 
 // List ...
 func (c *Chunks) List() (list.List[Chunk], error) {
-	var cks list.List[Chunk]
+	cks := list.List[Chunk]{}
 	for off := range c.chunks {
 		if err := cks.Add(c.chunks[off]); err != nil {
-			if err != nil {
-				return cks, err
-			}
+			return cks, err
 		}
 	}
 	sort.Slice(cks, func(i int, j int) bool { return cks[i].Offset().Before(cks[j].Offset()) })
@@ -138,7 +136,7 @@ func (c *Chunks) List() (list.List[Chunk], error) {
 }
 
 // Iterate returns a collection.Iterator that emits each Chunk in sequence order.
-func (c *Chunks) Iterate() (collection.Iterator[Chunk], error) {
+func (c *Chunks) Iterate() (hold.Iterator[Chunk], error) {
 	cks, err := c.List()
 	if err != nil {
 		return nil, err
@@ -168,7 +166,7 @@ func (c *Chunks) PB() ([]*filer_pb.FileChunk, error) {
 	for iter.HasNext() {
 		n, err := iter.Next()
 		if err != nil {
-			if !errors.Is(err, collection.ErrNoMoreElements) {
+			if !errors.Is(err, hold.ErrNoMoreElements) {
 				return values, err
 			}
 		}
@@ -219,7 +217,7 @@ func (c *Chunks) ToMap() map[string]any {
 
 // String returns a string representation of the Chunks.
 func (c *Chunks) String() string {
-	return string(support.ToJSON(c.ToMap()))
+	return string(anchor.ToJSON(c.ToMap()))
 }
 
 func (c *Chunks) chunksAt(i int, j int) (Chunk, Chunk, error) {

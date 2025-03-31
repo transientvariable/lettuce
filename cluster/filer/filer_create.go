@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/filer_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc/status"
 
@@ -63,7 +63,7 @@ func (f *Filer) Create(ctx context.Context, name string, mode gofs.FileMode) (*E
 		Signatures: []int32{f.signature},
 	}
 
-	log.Trace(fmt.Sprintf("[filer] create request: \n%s", support.ToJSONFormatted(req)))
+	log.Trace(fmt.Sprintf("[filer] create request: \n%s", anchor.ToJSONFormatted(req)))
 
 	resp, err := f.PB().CreateEntry(ctx, req)
 	if err != nil {

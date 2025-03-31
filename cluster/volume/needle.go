@@ -3,7 +3,7 @@ package volume
 import (
 	"fmt"
 
-	"github.com/transientvariable/support-go"
+	"github.com/transientvariable/anchor"
 )
 
 // Needle represents volume data for a single file ID.
@@ -32,5 +32,5 @@ func (n Needle) String() string {
 	if err := n.Err(); err != nil {
 		return err.Error()
 	}
-	return string(support.ToJSONFormatted(n))
+	return string(anchor.ToJSONFormatted(n))
 }

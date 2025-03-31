@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/transientvariable/collection-go"
+	"github.com/transientvariable/anchor/net/http"
+	"github.com/transientvariable/hold"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/net-go/http"
 
 	"github.com/valyala/bytebufferpool"
 
@@ -219,7 +219,7 @@ func (r *Reader) Seek(off int64, whence int) (int64, error) {
 	return off, nil
 }
 
-func (r *Reader) buffer(ctx context.Context, iter collection.Iterator[Chunk]) <-chan chan *rc {
+func (r *Reader) buffer(ctx context.Context, iter hold.Iterator[Chunk]) <-chan chan *rc {
 	queue := make(chan chan *rc)
 	go func() {
 		defer close(queue)
@@ -464,7 +464,7 @@ func (r *Reader) setErr(err error) error {
 	return r.err
 }
 
-func discard(iter collection.Iterator[Chunk], p int) error {
+func discard(iter hold.Iterator[Chunk], p int) error {
 	for i := 0; iter.HasNext() && i < p; i++ {
 		if _, err := iter.Next(); err != nil {
 			return err

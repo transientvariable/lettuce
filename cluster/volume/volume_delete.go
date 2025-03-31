@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/lettuce/client"
 	"github.com/transientvariable/lettuce/pb/volume_server_pb"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/support-go"
 
 	"google.golang.org/grpc/status"
 )
@@ -21,7 +21,7 @@ type DeleteResult struct {
 
 // String returns a string representation of the DeleteResult.
 func (r DeleteResult) String() string {
-	return string(support.ToJSONFormatted(r))
+	return string(anchor.ToJSONFormatted(r))
 }
 
 // Delete deletes the set of file IDs from the Volume.
@@ -40,7 +40,7 @@ func (v *Volume) Delete(ctx context.Context, fileIDs ...string) (DeleteResult, e
 		SkipCookieCheck: true,
 	}
 
-	log.Trace(fmt.Sprintf("[volume] delete request: \n%s", support.ToJSONFormatted(req)))
+	log.Trace(fmt.Sprintf("[volume] delete request: \n%s", anchor.ToJSONFormatted(req)))
 
 	dr := DeleteResult{Volume: v.ID().Host()}
 	resp, err := v.PB().BatchDelete(ctx, req)
