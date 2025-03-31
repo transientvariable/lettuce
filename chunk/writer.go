@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/transientvariable/anchor/net/http"
+	"github.com/transientvariable/lettuce/support"
 	"github.com/transientvariable/log-go"
 	"github.com/valyala/bytebufferpool"
 
-	weedsprt "github.com/transientvariable/lettuce/support"
 	gohttp "net/http"
 )
 
@@ -306,7 +306,7 @@ func (w *Writer) acquireChunk(ctx context.Context, s int, off int64) *wc {
 	if c.err != nil {
 		return c
 	}
-	c.content = weedsprt.AcquireBufferN(s)
+	c.content = support.AcquireBufferN(s)
 	c.offset = off
 	return c
 }
@@ -315,7 +315,7 @@ func (w *Writer) acquireChunk(ctx context.Context, s int, off int64) *wc {
 func (w *Writer) releaseChunk(c *wc) {
 	if c != nil {
 		if c.content != nil {
-			weedsprt.ReleaseBuffer(c.content)
+			support.ReleaseBuffer(c.content)
 		}
 		c.content = nil
 		c.fileID = ""

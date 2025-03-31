@@ -31,22 +31,22 @@ func WithHTTPClient(c *gohttp.Client) func(*File) {
 }
 
 // WithCluster sets the cluster for communicating with SeaweedFS backend services.
-func WithCluster(c *cluster.Cluster) func(*SeaweedFS) {
-	return func(s *SeaweedFS) {
+func WithCluster(c *cluster.Cluster) func(*Lettuce) {
+	return func(s *Lettuce) {
 		s.cluster = c
 	}
 }
 
 // WithGID sets the default group ID to use when writing data.
-func WithGID(gid uint32) func(*SeaweedFS) {
-	return func(s *SeaweedFS) {
+func WithGID(gid uint32) func(*Lettuce) {
+	return func(s *Lettuce) {
 		s.gid = int32(gid)
 	}
 }
 
 // WithUID sets the default user ID to use when writing data.
-func WithUID(uid uint32) func(*SeaweedFS) {
-	return func(s *SeaweedFS) {
+func WithUID(uid uint32) func(*Lettuce) {
+	return func(s *Lettuce) {
 		s.uid = int32(uid)
 	}
 }

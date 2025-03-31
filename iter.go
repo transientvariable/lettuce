@@ -24,14 +24,14 @@ type dirIterator struct {
 	entries <-chan dirEntry
 	filer   *filer.Filer
 	hasNext atomic.Bool
+	let     *Lettuce
 	mutex   sync.Mutex
 	name    string
 	next    dirEntry
-	weed    *SeaweedFS
 }
 
-func newDirIterator(ctx context.Context, weed *SeaweedFS, entry *filer.Entry) (fs.DirIterator, error) {
-	if weed == nil {
+func newDirIterator(ctx context.Context, let *Lettuce, entry *filer.Entry) (fs.DirIterator, error) {
+	if let == nil {
 		return nil, errors.New("dir_iterator: file system is required")
 	}
 
@@ -44,7 +44,7 @@ func newDirIterator(ctx context.Context, weed *SeaweedFS, entry *filer.Entry) (f
 		log.String("name", entry.Name()),
 		log.String("path", entry.Path().String()))
 
-	f := weed.cluster.Filer()
+	f := let.cluster.Filer()
 	c, err := f.PB().ListEntries(ctx, &filer_pb.ListEntriesRequest{
 		Directory: entry.Path().String(),
 	})
@@ -58,7 +58,7 @@ func newDirIterator(ctx context.Context, weed *SeaweedFS, entry *filer.Entry) (f
 		entries: read(ctx, f, entry, c),
 		filer:   f,
 		name:    entry.Name(),
-		weed:    weed,
+		let:     let,
 	}
 	iter.hasNext.Swap(true)
 	return iter, nil
@@ -83,7 +83,7 @@ func (i *dirIterator) Next() (*fs.Entry, error) {
 		return nil, de.err
 	}
 
-	e, err := FSEntry(i.weed, de.entry)
+	e, err := FSEntry(i.let, de.entry)
 	if err != nil {
 		return nil, err
 	}

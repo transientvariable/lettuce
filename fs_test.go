@@ -10,9 +10,9 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/transientvariable/anchor"
 	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/log-go"
-	"github.com/transientvariable/anchor"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -25,24 +25,24 @@ const (
 	storagePrefix = "dev"
 )
 
-// SeaweedFSTestSuite ...
-type SeaweedFSTestSuite struct {
+// LettuceTestSuite ...
+type LettuceTestSuite struct {
 	suite.Suite
 	files     map[string]gofs.FileInfo
 	filePaths []string
-	seaweedfs fs.FS
+	lettuce   fs.FS
 }
 
-func NewSeaweedFSTestSuite() *SeaweedFSTestSuite {
-	return &SeaweedFSTestSuite{}
+func NewLettuceTestSuite() *LettuceTestSuite {
+	return &LettuceTestSuite{}
 }
 
-func (t *SeaweedFSTestSuite) SetupTest() {
-	seaweedfs, err := New()
+func (t *LettuceTestSuite) SetupTest() {
+	lettuce, err := New()
 	if err != nil {
 		t.T().Fatal(err)
 	}
-	t.seaweedfs = seaweedfs
+	t.lettuce = lettuce
 
 	dir, err := os.Getwd()
 	if err != nil {
@@ -50,7 +50,7 @@ func (t *SeaweedFSTestSuite) SetupTest() {
 	}
 	dir = filepath.Join(dir, testDataDir)
 
-	log.Info("[seaweedfs_test]", log.String("test_data_dir", dir))
+	log.Info("[lettuce_test:setup]", log.String("test_data_dir", dir))
 
 	t.files = make(map[string]gofs.FileInfo)
 	err = filepath.Walk(dir, func(path string, fi gofs.FileInfo, err error) error {
@@ -66,12 +66,12 @@ func (t *SeaweedFSTestSuite) SetupTest() {
 
 			filePath := filepath.Join(storagePrefix, strings.TrimPrefix(path, dir+"/"))
 
-			log.Info("[seaweedfs_test] writing test file",
+			log.Info("[lettuce_test:setup] writing test file",
 				log.String("file_path", filePath),
 				log.Int("size", len(b)),
 				log.String("source", path))
 
-			if err := t.seaweedfs.WriteFile(filePath, b, modeCreate); err != nil {
+			if err := t.lettuce.WriteFile(filePath, b, modeCreate); err != nil {
 				return err
 			}
 			t.files[filePath] = fi
@@ -88,15 +88,15 @@ func (t *SeaweedFSTestSuite) SetupTest() {
 	}
 	t.filePaths = filePaths
 
-	log.Info(fmt.Sprintf("[seaweedfs_test:setup] file paths:\n%s", anchor.ToJSONFormatted(t.filePaths)))
+	log.Info(fmt.Sprintf("[lettuce_test:setup] file paths:\n%s", anchor.ToJSONFormatted(t.filePaths)))
 }
 
-func TestSeaweedFSTestSuite(t *testing.T) {
-	suite.Run(t, NewSeaweedFSTestSuite())
+func TestLettuceTestSuite(t *testing.T) {
+	suite.Run(t, NewLettuceTestSuite())
 }
 
-func (t *SeaweedFSTestSuite) TestFS() {
-	log.Info(fmt.Sprintf("[seaweedfs_test] filePaths: %s\n", anchor.ToJSONFormatted(t.filePaths)))
+func (t *LettuceTestSuite) TestFS() {
+	log.Info(fmt.Sprintf("[lettuce_test] filePaths: %s\n", anchor.ToJSONFormatted(t.filePaths)))
 
-	assert.NoError(t.T(), fstest.TestFS(t.seaweedfs, t.filePaths...))
+	assert.NoError(t.T(), fstest.TestFS(t.lettuce, t.filePaths...))
 }

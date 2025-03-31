@@ -10,9 +10,9 @@ import (
 	"github.com/transientvariable/fs-go"
 	"github.com/transientvariable/lettuce/chunk"
 	"github.com/transientvariable/lettuce/cluster/filer"
+	"github.com/transientvariable/lettuce/support"
 	"github.com/transientvariable/log-go"
 
-	weedsprt "github.com/transientvariable/lettuce/support"
 	gofs "io/fs"
 	gohttp "net/http"
 )
@@ -22,7 +22,7 @@ var (
 	_ gohttp.File = (*File)(nil)
 )
 
-// File provides access to a single file or directory provided by SeaweedFS.
+// File provides access to a single file or directory.
 //
 // Implements the behavior defined by the fs.File and http.File interfaces.
 type File struct {
@@ -35,18 +35,18 @@ type File struct {
 	entry     *filer.Entry
 	fileInfo  gofs.FileInfo
 	flag      int
+	let       *Lettuce
 	mutex     sync.Mutex
 	reader    io.ReadSeekCloser
 	rOff      int64
-	weed      *SeaweedFS
 	wOff      int64
 	writer    io.WriteCloser
 
 	blue error
 }
 
-func newFile(weed *SeaweedFS, flag int, options ...func(*File)) (*File, error) {
-	f := &File{weed: weed, flag: flag}
+func newFile(let *Lettuce, flag int, options ...func(*File)) (*File, error) {
+	f := &File{let: let, flag: flag}
 	for _, opt := range options {
 		opt(f)
 	}
@@ -57,19 +57,19 @@ func newFile(weed *SeaweedFS, flag int, options ...func(*File)) (*File, error) {
 	f.ctx, f.ctxCancel = context.WithCancel(f.ctxParent)
 
 	if f.entry == nil {
-		f.entry = weed.entry
+		f.entry = let.entry
 		return f, nil
 	}
 
 	if !f.entry.IsDir() && flag&fs.O_TRUNC > 0 {
-		log.Trace(fmt.Sprintf("[seaweedfs:file] truncating file ref: \n%s", f.entry))
+		log.Trace(fmt.Sprintf("[lettuce:file] truncating file ref: \n%s", f.entry))
 
-		path := fsPath(weed, f.entry.Path())
-		if _, err := weed.cluster.Truncate(f.ctx, path); err != nil {
+		path := fsPath(let, f.entry.Path())
+		if _, err := let.cluster.Truncate(f.ctx, path); err != nil {
 			return nil, err
 		}
 
-		e, err := weed.cluster.Filer().Stat(f.ctx, path)
+		e, err := let.cluster.Filer().Stat(f.ctx, path)
 		if err != nil {
 			return nil, err
 		}
@@ -83,12 +83,12 @@ func newFile(weed *SeaweedFS, flag int, options ...func(*File)) (*File, error) {
 	f.fileInfo = fi
 
 	if f.client == nil {
-		f.client = weed.httpClient
+		f.client = let.httpClient
 	}
 
 	if err := f.checkRead("newFile"); err == nil {
 		f.reader, err = chunk.NewReader(
-			weed.cluster.Master().FindVolumes,
+			let.cluster.Master().FindVolumes,
 			f.entry.Chunks(),
 			chunk.WithReaderContext(f.ctx))
 		if err != nil {
@@ -99,7 +99,7 @@ func newFile(weed *SeaweedFS, flag int, options ...func(*File)) (*File, error) {
 	if err := f.checkWrite("newFile"); err == nil {
 		f.writer, err = chunk.NewWriter(
 			f.entry.Path().String(),
-			weed.cluster.Filer().AssignVolume,
+			let.cluster.Filer().AssignVolume,
 			chunk.WithWriterChunks(f.entry.Chunks()),
 			chunk.WithWriterContext(f.ctx))
 		if err != nil {
@@ -124,11 +124,11 @@ func (f *File) Close() error {
 	if !f.closed {
 		f.closed = true
 		if err := f.finalize(); err != nil {
-			return fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{Op: "close", Err: err})
+			return fmt.Errorf("lettuce_file: %w", &gofs.PathError{Op: "close", Err: err})
 		}
 		return nil
 	}
-	return fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{Op: "close", Err: gofs.ErrClosed})
+	return fmt.Errorf("lettuce_file: %w", &gofs.PathError{Op: "close", Err: gofs.ErrClosed})
 }
 
 func (f *File) Read(b []byte) (int, error) {
@@ -149,7 +149,7 @@ func (f *File) Read(b []byte) (int, error) {
 
 	n, err := f.reader.Read(b)
 	if err != nil {
-		return 0, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return 0, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "read",
 			Path: f.fileInfo.Name(),
 			Err:  err,
@@ -173,7 +173,7 @@ func (f *File) ReadAt(b []byte, off int64) (int, error) {
 
 	s, err := f.reader.Seek(off, io.SeekStart)
 	if err != nil {
-		return 0, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return 0, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "readAt",
 			Path: f.fileInfo.Name(),
 			Err:  err,
@@ -199,7 +199,7 @@ func (f *File) ReadFrom(r io.Reader) (int64, error) {
 	}
 
 	if r == nil {
-		return 0, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return 0, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "readFrom",
 			Path: f.fileInfo.Name(),
 			Err:  errors.New("reader is nil"),
@@ -214,12 +214,12 @@ func (f *File) ReadFrom(r io.Reader) (int64, error) {
 		bufSize = int(f.fileInfo.Size())
 	}
 
-	buf := weedsprt.AcquireBufferN(bufSize)
-	defer weedsprt.ReleaseBuffer(buf)
+	buf := support.AcquireBufferN(bufSize)
+	defer support.ReleaseBuffer(buf)
 
 	n, err := io.CopyBuffer(f.writer, r, buf)
 	if err != nil {
-		return n, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return n, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "readFrom",
 			Path: f.fileInfo.Name(),
 			Err:  err,
@@ -257,7 +257,7 @@ func (f *File) Seek(off int64, whence int) (int64, error) {
 
 	s, err := f.reader.Seek(off, whence)
 	if err != nil {
-		return 0, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return 0, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "seek",
 			Path: f.fileInfo.Name(),
 			Err:  err,
@@ -273,14 +273,14 @@ func (f *File) Stat() (gofs.FileInfo, error) {
 	}
 
 	if f.closed {
-		return nil, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return nil, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "stat",
 			Path: f.fileInfo.Name(),
 			Err:  gofs.ErrClosed,
 		})
 	}
 
-	e, err := FSEntry(f.weed, f.entry)
+	e, err := FSEntry(f.let, f.entry)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,7 @@ func (f *File) Write(b []byte) (int, error) {
 
 	n, err := f.writer.Write(b)
 	if err != nil {
-		return n, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return n, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "write",
 			Path: f.fileInfo.Name(),
 			Err:  err,
@@ -322,7 +322,7 @@ func (f *File) String() string {
 
 func (f *File) checkRegularFile(op string) error {
 	if f.entry.IsDir() {
-		return fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   op,
 			Path: f.entry.Name(),
 			Err:  errors.New("is a directory"),
@@ -337,7 +337,7 @@ func (f *File) checkRead(op string) error {
 	}
 
 	if f.flag == fs.O_WRONLY {
-		return fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   op,
 			Path: f.entry.Name(),
 			Err:  errors.New("file is write-only"),
@@ -352,7 +352,7 @@ func (f *File) checkWrite(op string) error {
 	}
 
 	if f.flag == fs.O_RDONLY {
-		return fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   op,
 			Path: f.entry.Name(),
 			Err:  errors.New("file is read-only"),
@@ -371,7 +371,7 @@ func (f *File) finalize() error {
 		err = errors.Join(err, f.writer.Close())
 		if f.wOff > 0 {
 			//sort.Stable(f.entry.Chunks())
-			err = errors.Join(err, f.weed.cluster.Filer().Update(f.ctx, f.entry))
+			err = errors.Join(err, f.let.cluster.Filer().Update(f.ctx, f.entry))
 		}
 	}
 	return err
@@ -384,7 +384,7 @@ func (f *File) readDir(n int) ([]*fs.Entry, error) {
 	}
 
 	if !fi.IsDir() {
-		return nil, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+		return nil, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 			Op:   "readDir",
 			Path: fi.Name(),
 			Err:  fs.ErrNotDir,
@@ -395,9 +395,9 @@ func (f *File) readDir(n int) ([]*fs.Entry, error) {
 	defer f.mutex.Unlock()
 
 	if f.dirIter == nil {
-		iter, err := newDirIterator(f.ctx, f.weed, f.entry)
+		iter, err := newDirIterator(f.ctx, f.let, f.entry)
 		if err != nil {
-			return nil, fmt.Errorf("seaweedfs_file: %w", &gofs.PathError{
+			return nil, fmt.Errorf("lettuce_file: %w", &gofs.PathError{
 				Op:   "readDir",
 				Path: fi.Name(),
 				Err:  err,

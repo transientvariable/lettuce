@@ -28,11 +28,11 @@ const (
 )
 
 var (
-	_ fs.FS = (*SeaweedFS)(nil)
+	_ fs.FS = (*Lettuce)(nil)
 )
 
-// SeaweedFS is a file system provider that implements fs.FS using SeaweedFS for the storage backend.
-type SeaweedFS struct {
+// Lettuce is a file system provider that implements fs.FS using SeaweedFS for the storage backend.
+type Lettuce struct {
 	closed     bool
 	cluster    *cluster.Cluster
 	entry      *filer.Entry
@@ -43,91 +43,91 @@ type SeaweedFS struct {
 }
 
 // New creates a new fs.FS backed by SeaweedFS using the provided options.
-func New(options ...func(*SeaweedFS)) (*SeaweedFS, error) {
-	weed := &SeaweedFS{httpClient: http.DefaultClient()}
+func New(options ...func(*Lettuce)) (*Lettuce, error) {
+	let := &Lettuce{httpClient: http.DefaultClient()}
 	for _, opt := range options {
-		opt(weed)
+		opt(let)
 	}
 
-	if weed.cluster == nil {
-		log.Warn("[seaweedfs] cluster configuration not provided, using default")
+	if let.cluster == nil {
+		log.Warn("[lettuce] cluster configuration not provided, using default")
 
 		c, err := cluster.New()
 		if err != nil {
-			return nil, fmt.Errorf("seaweedfs: %w", err)
+			return nil, fmt.Errorf("lettuce: %w", err)
 		}
-		weed.cluster = c
+		let.cluster = c
 	}
-	weed.entry = weed.cluster.Filer().Root().Entry()
+	let.entry = let.cluster.Filer().Root().Entry()
 
-	if weed.gid <= 0 {
-		weed.gid = client.GID
+	if let.gid <= 0 {
+		let.gid = client.GID
 	}
 
-	if weed.uid <= 0 {
-		weed.uid = client.UID
+	if let.uid <= 0 {
+		let.uid = client.UID
 	}
-	return weed, nil
+	return let, nil
 }
 
-// Close releases any resources used by SeaweedFS.
-func (s *SeaweedFS) Close() error {
-	log.Debug("[seaweedfs] close")
+// Close releases any resources used by Lettuce.
+func (l *Lettuce) Close() error {
+	log.Debug("[lettuce] close")
 
-	if s == nil {
+	if l == nil {
 		return gofs.ErrInvalid
 	}
 
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
 
-	if s.entry != nil && s.entry.Name() != s.PathSeparator() {
+	if l.entry != nil && l.entry.Name() != l.PathSeparator() {
 		return nil
 	}
 
-	if !s.closed {
-		s.closed = true
-		if s.cluster != nil {
-			if err := s.cluster.Close(); err != nil && !errors.Is(err, gofs.ErrClosed) {
+	if !l.closed {
+		l.closed = true
+		if l.cluster != nil {
+			if err := l.cluster.Close(); err != nil && !errors.Is(err, gofs.ErrClosed) {
 				return err
 			}
 		}
-		return s.cluster.Close()
+		return l.cluster.Close()
 	}
-	return fmt.Errorf("seaweedfs: %w", gofs.ErrClosed)
+	return fmt.Errorf("lettuce: %w", gofs.ErrClosed)
 }
 
 // Cluster returns the cluster API used for performing operations against a SeaweedFS backend.
-func (s *SeaweedFS) Cluster() *cluster.Cluster {
+func (l *Lettuce) Cluster() *cluster.Cluster {
 	// TODO: Check if FS is closed?
-	return s.cluster
+	return l.cluster
 }
 
 // Create ...
-func (s *SeaweedFS) Create(name string) (fs.File, error) {
-	log.Debug("[seaweedfs] create", log.String("name", name))
+func (l *Lettuce) Create(name string) (fs.File, error) {
+	log.Debug("[lettuce] create", log.String("name", name))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	f, err := open(ctx, s, name, fs.O_RDWR|fs.O_CREATE|fs.O_TRUNC, modeCreate)
+	f, err := open(ctx, l, name, fs.O_RDWR|fs.O_CREATE|fs.O_TRUNC, modeCreate)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "create", Path: name, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "create", Path: name, Err: err})
 	}
 	return f, nil
 }
 
 // Glob ...
-func (s *SeaweedFS) Glob(pattern string) ([]string, error) {
-	log.Debug("[seaweedfs] glob", log.String("pattern", pattern))
+func (l *Lettuce) Glob(pattern string) ([]string, error) {
+	log.Debug("[lettuce] glob", log.String("pattern", pattern))
 
 	var matches []string
-	err := gofs.WalkDir(s, `.`, func(path string, entry gofs.DirEntry, err error) error {
+	err := gofs.WalkDir(l, `.`, func(path string, entry gofs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if fs.EndsWithDot(s, path) {
+		if fs.EndsWithDot(l, path) {
 			return nil
 		}
 
@@ -143,7 +143,7 @@ func (s *SeaweedFS) Glob(pattern string) ([]string, error) {
 	})
 	if err != nil {
 		if !errors.Is(err, &gofs.PathError{}) {
-			return matches, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "glob", Err: err})
+			return matches, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "glob", Err: err})
 		}
 		return matches, err
 	}
@@ -151,21 +151,21 @@ func (s *SeaweedFS) Glob(pattern string) ([]string, error) {
 }
 
 // Mkdir creates a new directory with the specified name and permission bits.
-func (s *SeaweedFS) Mkdir(name string, perm gofs.FileMode) error {
-	log.Debug("[seaweedfs] mkdir", log.String("name", name))
+func (l *Lettuce) Mkdir(name string, perm gofs.FileMode) error {
+	log.Debug("[lettuce] mkdir", log.String("name", name))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if _, err := mkdir(ctx, s, name, perm); err != nil {
-		return fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "mkdir", Path: name, Err: err})
+	if _, err := mkdir(ctx, l, name, perm); err != nil {
+		return fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "mkdir", Path: name, Err: err})
 	}
 	return nil
 }
 
 // MkdirAll ...
-func (s *SeaweedFS) MkdirAll(path string, mode gofs.FileMode) error {
-	log.Debug("[seaweedfs] mkdirAll",
+func (l *Lettuce) MkdirAll(path string, mode gofs.FileMode) error {
+	log.Debug("[lettuce] mkdirAll",
 		log.String("path", path),
 		log.String("mode", mode.String()),
 	)
@@ -173,29 +173,29 @@ func (s *SeaweedFS) MkdirAll(path string, mode gofs.FileMode) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if _, err := mkdirAll(ctx, s, path, mode); err != nil {
-		return fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "mkdirAll", Path: path, Err: err})
+	if _, err := mkdirAll(ctx, l, path, mode); err != nil {
+		return fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "mkdirAll", Path: path, Err: err})
 	}
 	return nil
 }
 
 // Open ...
-func (s *SeaweedFS) Open(name string) (gofs.File, error) {
-	log.Debug("[seaweedfs] open", log.String("name", name))
+func (l *Lettuce) Open(name string) (gofs.File, error) {
+	log.Debug("[lettuce] open", log.String("name", name))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	f, err := open(ctx, s, name, fs.O_RDONLY, 0)
+	f, err := open(ctx, l, name, fs.O_RDONLY, 0)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "open", Path: name, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "open", Path: name, Err: err})
 	}
 	return f, nil
 }
 
 // OpenFile ...
-func (s *SeaweedFS) OpenFile(name string, flag int, mode gofs.FileMode) (fs.File, error) {
-	log.Debug("[seaweedfs] openFile",
+func (l *Lettuce) OpenFile(name string, flag int, mode gofs.FileMode) (fs.File, error) {
+	log.Debug("[lettuce] openFile",
 		log.String("name", name),
 		log.Int("flag", flag),
 		log.String("mode", mode.String()),
@@ -204,44 +204,44 @@ func (s *SeaweedFS) OpenFile(name string, flag int, mode gofs.FileMode) (fs.File
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	f, err := open(ctx, s, name, flag, mode)
+	f, err := open(ctx, l, name, flag, mode)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "openFile", Path: name, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "openFile", Path: name, Err: err})
 	}
 	return f, nil
 }
 
 // PathSeparator ...
-func (s *SeaweedFS) PathSeparator() string {
-	return s.cluster.Filer().PathSeparator()
+func (l *Lettuce) PathSeparator() string {
+	return l.cluster.Filer().PathSeparator()
 }
 
 // Provider ...
-func (s *SeaweedFS) Provider() string {
-	return "seaweedfs"
+func (l *Lettuce) Provider() string {
+	return "lettuce"
 }
 
 // ReadDir ...
-func (s *SeaweedFS) ReadDir(name string) ([]gofs.DirEntry, error) {
-	log.Debug("[seaweedfs] readDir", log.String("current_dir", s.entry.Name()), log.String("name", name))
+func (l *Lettuce) ReadDir(name string) ([]gofs.DirEntry, error) {
+	log.Debug("[lettuce] readDir", log.String("current_dir", l.entry.Name()), log.String("name", name))
 
-	sub, err := s.Sub(name)
+	sub, err := l.Sub(name)
 	if err != nil {
 		return nil, err
 	}
-	dir := sub.(*SeaweedFS)
+	dir := sub.(*Lettuce)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	list, err := newDirIterator(ctx, s, dir.entry)
+	list, err := newDirIterator(ctx, l, dir.entry)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "readDir", Path: dir.entry.Name(), Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "readDir", Path: dir.entry.Name(), Err: err})
 	}
 
 	de, err := list.NextN(-1)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "readDir", Path: dir.entry.Name(), Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "readDir", Path: dir.entry.Name(), Err: err})
 	}
 
 	entries := make([]gofs.DirEntry, len(de))
@@ -252,55 +252,55 @@ func (s *SeaweedFS) ReadDir(name string) ([]gofs.DirEntry, error) {
 }
 
 // ReadFile ...
-func (s *SeaweedFS) ReadFile(name string) ([]byte, error) {
-	log.Debug("[seaweedfs] readFile", log.String("name", name))
+func (l *Lettuce) ReadFile(name string) ([]byte, error) {
+	log.Debug("[lettuce] readFile", log.String("name", name))
 
-	f, err := s.Open(name)
+	f, err := l.Open(name)
 	if err != nil {
 		return nil, err
 	}
 	defer func(f gofs.File) {
 		if err := f.Close(); err != nil {
-			log.Error("[seaweedfs] readFile", log.Err(err))
+			log.Error("[lettuce] readFile", log.Err(err))
 		}
 	}(f)
 
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "readFile", Path: name, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "readFile", Path: name, Err: err})
 	}
 	return b, nil
 }
 
 // Remove ...
-func (s *SeaweedFS) Remove(name string) error {
-	log.Debug("[seaweedfs] remove", log.String("name", name))
+func (l *Lettuce) Remove(name string) error {
+	log.Debug("[lettuce] remove", log.String("name", name))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := remove(ctx, s, name); err != nil {
-		return fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "remove", Path: name, Err: err})
+	if err := remove(ctx, l, name); err != nil {
+		return fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "remove", Path: name, Err: err})
 	}
 	return nil
 }
 
 // RemoveAll ...
-func (s *SeaweedFS) RemoveAll(path string) error {
-	log.Debug("[seaweedfs] removeAll", log.String("path", path))
+func (l *Lettuce) RemoveAll(path string) error {
+	log.Debug("[lettuce] removeAll", log.String("path", path))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := removeAll(ctx, s, path); err != nil {
-		return fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "rename", Path: path, Err: err})
+	if err := removeAll(ctx, l, path); err != nil {
+		return fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "rename", Path: path, Err: err})
 	}
 	return nil
 }
 
 // Rename ...
-func (s *SeaweedFS) Rename(oldpath string, newpath string) error {
-	log.Debug("[seaweedfs] rename",
+func (l *Lettuce) Rename(oldpath string, newpath string) error {
+	log.Debug("[lettuce] rename",
 		log.String("old_path", oldpath),
 		log.String("new_path", newpath),
 	)
@@ -308,53 +308,53 @@ func (s *SeaweedFS) Rename(oldpath string, newpath string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := rename(ctx, s, oldpath, newpath); err != nil {
-		return fmt.Errorf("seaweedfs: %w", &goos.LinkError{Op: "rename", Old: oldpath, New: newpath, Err: err})
+	if err := rename(ctx, l, oldpath, newpath); err != nil {
+		return fmt.Errorf("lettuce: %w", &goos.LinkError{Op: "rename", Old: oldpath, New: newpath, Err: err})
 	}
 	return nil
 }
 
 // Root ...
-func (s *SeaweedFS) Root() (string, error) {
-	return s.cluster.Filer().Root().Path().Name(), nil
+func (l *Lettuce) Root() (string, error) {
+	return l.cluster.Filer().Root().Path().Name(), nil
 }
 
 // Stat ...
-func (s *SeaweedFS) Stat(name string) (gofs.FileInfo, error) {
-	log.Debug("[seaweedfs] stat", log.String("name", name))
+func (l *Lettuce) Stat(name string) (gofs.FileInfo, error) {
+	log.Debug("[lettuce] stat", log.String("name", name))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	fe, err := stat(ctx, s, name)
+	fe, err := stat(ctx, l, name)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "stat", Path: name, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "stat", Path: name, Err: err})
 	}
 
-	e, err := FSEntry(s, fe)
+	e, err := FSEntry(l, fe)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "stat", Path: name, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "stat", Path: name, Err: err})
 	}
 	return e, nil
 }
 
 // Sub ...
-func (s *SeaweedFS) Sub(dir string) (gofs.FS, error) {
-	log.Debug("[seaweedfs] sub", log.String("current", s.entry.Name()), log.String("dir", dir))
+func (l *Lettuce) Sub(dir string) (gofs.FS, error) {
+	log.Debug("[lettuce] sub", log.String("current", l.entry.Name()), log.String("dir", dir))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	sub, err := sub(ctx, s, dir)
+	sub, err := sub(ctx, l, dir)
 	if err != nil {
-		return nil, fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "sub", Path: dir, Err: err})
+		return nil, fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "sub", Path: dir, Err: err})
 	}
 	return sub, nil
 }
 
 // WriteFile ...
-func (s *SeaweedFS) WriteFile(name string, data []byte, mode gofs.FileMode) error {
-	log.Debug("[seaweedfs] writeFile",
+func (l *Lettuce) WriteFile(name string, data []byte, mode gofs.FileMode) error {
+	log.Debug("[lettuce] writeFile",
 		log.String("name", name),
 		log.Int("content_length", len(data)),
 		log.String("mode", mode.String()),
@@ -363,13 +363,13 @@ func (s *SeaweedFS) WriteFile(name string, data []byte, mode gofs.FileMode) erro
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	f, err := open(ctx, s, name, fs.O_RDWR|fs.O_CREATE|fs.O_TRUNC, mode)
+	f, err := open(ctx, l, name, fs.O_RDWR|fs.O_CREATE|fs.O_TRUNC, mode)
 	if err != nil {
-		return fmt.Errorf("seaweedfs: %w", &gofs.PathError{Op: "writeFile", Path: name, Err: err})
+		return fmt.Errorf("lettuce: %w", &gofs.PathError{Op: "writeFile", Path: name, Err: err})
 	}
 	defer func(f *File) {
 		if err := f.Close(); err != nil {
-			log.Error("[seaweedfs] writeFile", log.Err(err))
+			log.Error("[lettuce] writeFile", log.Err(err))
 		}
 	}(f)
 
@@ -381,51 +381,51 @@ func (s *SeaweedFS) WriteFile(name string, data []byte, mode gofs.FileMode) erro
 	return nil
 }
 
-// String returns a string representation of SeaweedFS.
-func (s *SeaweedFS) String() string {
+// String returns a string representation of Lettuce.
+func (l *Lettuce) String() string {
 	m := make(map[string]any)
-	if s.entry != nil {
-		e, err := s.entry.ToMap()
+	if l.entry != nil {
+		e, err := l.entry.ToMap()
 		if err != nil {
 			m["file"] = err.Error()
 		}
 		m["file"] = e
 	}
-	m["root"] = s.cluster.Filer().Root().Entry()
+	m["root"] = l.cluster.Filer().Root().Entry()
 	return string(anchor.ToJSONFormatted(m))
 }
 
-func (s *SeaweedFS) path() (string, error) {
-	r, err := s.Root()
+func (l *Lettuce) path() (string, error) {
+	r, err := l.Root()
 	if err != nil {
 		return "", err
 	}
 
 	// TODO: This needs to be cleaned up...
-	p := s.entry.Path().String()
-	if strings.HasPrefix(p, s.PathSeparator()) {
-		p = strings.TrimPrefix(p, s.PathSeparator())
+	p := l.entry.Path().String()
+	if strings.HasPrefix(p, l.PathSeparator()) {
+		p = strings.TrimPrefix(p, l.PathSeparator())
 	}
 
 	if p == r {
 		return p, nil
 	}
 
-	if s.entry != nil && strings.HasPrefix(p, r) {
+	if l.entry != nil && strings.HasPrefix(p, r) {
 		p = strings.TrimPrefix(p, r)
-		if strings.HasPrefix(p, s.PathSeparator()) {
-			p = strings.TrimPrefix(p, s.PathSeparator())
+		if strings.HasPrefix(p, l.PathSeparator()) {
+			p = strings.TrimPrefix(p, l.PathSeparator())
 		}
 		return p, nil
 	}
-	return "", errors.New("seaweedfs: path not found")
+	return "", errors.New("lettuce: path not found")
 }
 
-func create(ctx context.Context, weed *SeaweedFS, name string, flag int, mode gofs.FileMode) (*File, error) {
+func create(ctx context.Context, let *Lettuce, name string, flag int, mode gofs.FileMode) (*File, error) {
 	if mode&gofs.ModeDir != 0 {
-		log.Trace("[seaweedfs] directory mode bits set, creating path as directory", log.String("name", name))
+		log.Trace("[lettuce] directory mode bits set, creating path as directory", log.String("name", name))
 
-		dir, err := mkdirAll(ctx, weed, name, mode)
+		dir, err := mkdirAll(ctx, let, name, mode)
 		if err != nil {
 			return nil, err
 		}
@@ -437,37 +437,37 @@ func create(ctx context.Context, weed *SeaweedFS, name string, flag int, mode go
 		return file, nil
 	}
 
-	p, err := fs.SplitPath(weed, name)
+	p, err := fs.SplitPath(let, name)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(p) == 1 {
-		dir, err := mkdirAll(ctx, weed, filepath.Dir(name), mode)
+		dir, err := mkdirAll(ctx, let, filepath.Dir(name), mode)
 		if err != nil {
 			return nil, err
 		}
-		weed = dir
+		let = dir
 	}
 
-	e, err := weed.cluster.Filer().Create(ctx, name, mode)
+	e, err := let.cluster.Filer().Create(ctx, name, mode)
 	if err != nil {
 		return nil, err
 	}
-	return newFile(weed, flag, WithEntry(e))
+	return newFile(let, flag, WithEntry(e))
 }
 
-func mkdir(ctx context.Context, weed *SeaweedFS, name string, mode gofs.FileMode) (*SeaweedFS, error) {
-	n, err := fs.CleanPath(weed, name)
+func mkdir(ctx context.Context, let *Lettuce, name string, mode gofs.FileMode) (*Lettuce, error) {
+	n, err := fs.CleanPath(let, name)
 	if err != nil {
 		return nil, err
 	}
 
-	if fs.EndsWithDot(weed, n) {
+	if fs.EndsWithDot(let, n) {
 		return nil, gofs.ErrInvalid
 	}
 
-	p, err := fs.SplitPath(weed, n)
+	p, err := fs.SplitPath(let, n)
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +476,7 @@ func mkdir(ctx context.Context, weed *SeaweedFS, name string, mode gofs.FileMode
 		return nil, gofs.ErrInvalid
 	}
 
-	if _, err := stat(ctx, weed, n); err != nil {
+	if _, err := stat(ctx, let, n); err != nil {
 		if !errors.Is(err, gofs.ErrNotExist) {
 			return nil, err
 		}
@@ -484,33 +484,33 @@ func mkdir(ctx context.Context, weed *SeaweedFS, name string, mode gofs.FileMode
 		return nil, gofs.ErrExist
 	}
 
-	dir := filepath.Join(weed.entry.Path().String(), n)
+	dir := filepath.Join(let.entry.Path().String(), n)
 
-	log.Trace("[seaweedfs] mkdir: creating directory",
+	log.Trace("[lettuce] mkdir: creating directory",
 		log.String("name", n),
-		log.String("parent", weed.entry.Path().String()),
+		log.String("parent", let.entry.Path().String()),
 		log.Int("mode", int(mode)))
 
-	e, err := weed.cluster.Filer().Create(ctx, dir, mode|gofs.ModeDir)
+	e, err := let.cluster.Filer().Create(ctx, dir, mode|gofs.ModeDir)
 	if err != nil {
 		return nil, err
 	}
-	return &SeaweedFS{
-		cluster: weed.cluster,
+	return &Lettuce{
+		cluster: let.cluster,
 		entry:   e,
-		gid:     weed.gid,
-		uid:     weed.uid,
+		gid:     let.gid,
+		uid:     let.uid,
 	}, nil
 }
 
-func mkdirAll(ctx context.Context, weed *SeaweedFS, path string, mode gofs.FileMode) (*SeaweedFS, error) {
-	p, err := fs.SplitPath(weed, path)
+func mkdirAll(ctx context.Context, let *Lettuce, path string, mode gofs.FileMode) (*Lettuce, error) {
+	p, err := fs.SplitPath(let, path)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, dir := range p {
-		s, err := sub(ctx, weed, dir)
+		s, err := sub(ctx, let, dir)
 		if err != nil {
 			if !errors.Is(err, gofs.ErrNotExist) {
 				return nil, err
@@ -518,49 +518,49 @@ func mkdirAll(ctx context.Context, weed *SeaweedFS, path string, mode gofs.FileM
 		}
 
 		if s != nil {
-			weed = s
+			let = s
 			continue
 		}
 
-		if weed, err = mkdir(ctx, weed, dir, mode); err != nil {
+		if let, err = mkdir(ctx, let, dir, mode); err != nil {
 			return nil, err
 		}
 	}
-	return weed, nil
+	return let, nil
 }
 
-func open(ctx context.Context, weed *SeaweedFS, name string, flag int, mode gofs.FileMode) (*File, error) {
-	log.Trace("[seaweedfs] open",
+func open(ctx context.Context, let *Lettuce, name string, flag int, mode gofs.FileMode) (*File, error) {
+	log.Trace("[lettuce] open",
 		log.String("name", name),
 		log.Int("flag", flag),
 		log.String("mode", mode.String()))
 
-	name, err := fs.CleanPath(weed, name)
+	name, err := fs.CleanPath(let, name)
 	if err != nil {
 		return nil, err
 	}
 
 	if name == "." {
-		return newFile(weed, fs.O_RDONLY)
+		return newFile(let, fs.O_RDONLY)
 	}
 
-	e, err := stat(ctx, weed, name)
+	e, err := stat(ctx, let, name)
 	if err != nil {
 		if errors.Is(err, gofs.ErrNotExist) && flag&fs.O_CREATE != 0 {
-			log.Trace("[seaweedfs] creating new file", log.String("name", name))
-			return create(ctx, weed, name, flag, mode)
+			log.Trace("[lettuce] creating new file", log.String("name", name))
+			return create(ctx, let, name, flag, mode)
 		}
 		return nil, err
 	}
 
 	if !e.IsDir() {
-		return newFile(weed, flag, WithEntry(e))
+		return newFile(let, flag, WithEntry(e))
 	}
-	return newFile(weed, fs.O_RDONLY, WithEntry(e))
+	return newFile(let, fs.O_RDONLY, WithEntry(e))
 }
 
-func remove(ctx context.Context, weed *SeaweedFS, name string) error {
-	fi, err := stat(ctx, weed, name)
+func remove(ctx context.Context, let *Lettuce, name string) error {
+	fi, err := stat(ctx, let, name)
 	if err != nil {
 		if !errors.Is(err, gofs.ErrNotExist) {
 			return err
@@ -572,14 +572,14 @@ func remove(ctx context.Context, weed *SeaweedFS, name string) error {
 		return fs.ErrIsDir
 	}
 
-	if _, err := weed.cluster.Filer().Remove(ctx, name); err != nil {
+	if _, err := let.cluster.Filer().Remove(ctx, name); err != nil {
 		return err
 	}
 	return nil
 }
 
-func removeAll(ctx context.Context, weed *SeaweedFS, path string) error {
-	e, err := stat(ctx, weed, path)
+func removeAll(ctx context.Context, let *Lettuce, path string) error {
+	e, err := stat(ctx, let, path)
 	if err != nil {
 		if !errors.Is(err, gofs.ErrNotExist) {
 			return err
@@ -587,7 +587,7 @@ func removeAll(ctx context.Context, weed *SeaweedFS, path string) error {
 		return nil
 	}
 
-	r, err := weed.Root()
+	r, err := let.Root()
 	if err != nil {
 		return err
 	}
@@ -596,52 +596,52 @@ func removeAll(ctx context.Context, weed *SeaweedFS, path string) error {
 		return gofs.ErrInvalid
 	}
 
-	if _, err := weed.cluster.Filer().Remove(ctx, path); err != nil {
+	if _, err := let.cluster.Filer().Remove(ctx, path); err != nil {
 		return err
 	}
 	return nil
 }
 
-func rename(ctx context.Context, weed *SeaweedFS, oldpath string, newpath string) error {
-	o, err := fs.CleanPath(weed, oldpath)
+func rename(ctx context.Context, let *Lettuce, oldpath string, newpath string) error {
+	o, err := fs.CleanPath(let, oldpath)
 	if err != nil {
 		return err
 	}
 
-	n, err := fs.CleanPath(weed, newpath)
+	n, err := fs.CleanPath(let, newpath)
 	if err != nil {
 		return err
 	}
 
-	if fs.EndsWithDot(weed, o) || fs.EndsWithDot(weed, n) {
+	if fs.EndsWithDot(let, o) || fs.EndsWithDot(let, n) {
 		return gofs.ErrInvalid
 	}
-	return weed.cluster.Filer().Rename(ctx, o, n)
+	return let.cluster.Filer().Rename(ctx, o, n)
 }
 
-func stat(ctx context.Context, weed *SeaweedFS, name string) (*filer.Entry, error) {
-	name, err := fs.CleanPath(weed, name)
+func stat(ctx context.Context, let *Lettuce, name string) (*filer.Entry, error) {
+	name, err := fs.CleanPath(let, name)
 	if err != nil {
 		return nil, err
 	}
 
 	if name == "." {
-		return weed.entry, nil
+		return let.entry, nil
 	}
 
-	r, err := weed.Root()
+	r, err := let.Root()
 	if err != nil {
 		return nil, err
 	}
 
-	if weed.entry.Name() != r {
-		name = strings.Join([]string{weed.entry.Name(), name}, weed.PathSeparator())
+	if let.entry.Name() != r {
+		name = strings.Join([]string{let.entry.Name(), name}, let.PathSeparator())
 	}
-	return weed.cluster.Filer().Stat(ctx, name)
+	return let.cluster.Filer().Stat(ctx, name)
 }
 
-func sub(ctx context.Context, weed *SeaweedFS, dir string) (*SeaweedFS, error) {
-	e, err := stat(ctx, weed, dir)
+func sub(ctx context.Context, let *Lettuce, dir string) (*Lettuce, error) {
+	e, err := stat(ctx, let, dir)
 	if err != nil {
 		return nil, err
 	}
@@ -649,12 +649,12 @@ func sub(ctx context.Context, weed *SeaweedFS, dir string) (*SeaweedFS, error) {
 	if !e.IsDir() {
 		return nil, fs.ErrNotDir
 	}
-	return &SeaweedFS{
-		cluster:    weed.cluster,
+	return &Lettuce{
+		cluster:    let.cluster,
 		entry:      e,
-		gid:        weed.gid,
-		httpClient: weed.httpClient,
-		uid:        weed.uid,
+		gid:        let.gid,
+		httpClient: let.httpClient,
+		uid:        let.uid,
 	}, nil
 }
 

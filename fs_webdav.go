@@ -25,16 +25,16 @@ var (
 // WebDAV an implementation of the webdav.FileSystem using SeaweedFS for the storage backend.
 type WebDAV struct {
 	closed bool
+	let    *Lettuce
 	mutex  sync.Mutex
-	weed   *SeaweedFS
 }
 
-// NewWebDAV creates a new webdav.FileSystem backed by the provided SeaweedFS instance.
-func NewWebDAV(weed *SeaweedFS) (*WebDAV, error) {
-	if weed == nil {
-		return nil, errors.New("seaweedfs_webdav: seaweedfs backend is required")
+// NewWebDAV creates a new webdav.FileSystem backed by the provided Lettuce instance.
+func NewWebDAV(let *Lettuce) (*WebDAV, error) {
+	if let == nil {
+		return nil, errors.New("lettuce_webdav: lettuce backend is required")
 	}
-	return &WebDAV{weed: weed}, nil
+	return &WebDAV{let: let}, nil
 }
 
 // Close releases any resources used by WebDAV.
@@ -48,20 +48,20 @@ func (w *WebDAV) Close() error {
 
 	if !w.closed {
 		w.closed = true
-		if w.weed != nil {
-			if err := w.weed.Close(); err != nil && !errors.Is(err, gofs.ErrClosed) {
+		if w.let != nil {
+			if err := w.let.Close(); err != nil && !errors.Is(err, gofs.ErrClosed) {
 				return err
 			}
 		}
 		return nil
 	}
-	return fmt.Errorf("seaweedfs_webdav: %w", gofs.ErrClosed)
+	return fmt.Errorf("lettuce_webdav: %w", gofs.ErrClosed)
 }
 
 func (w *WebDAV) Mkdir(ctx context.Context, name string, mode os.FileMode) error {
 	name = resolve(name)
 
-	log.Debug("[seaweedfs:webdav] mkdir", log.String("name", name), log.String("perm", mode.String()))
+	log.Debug("[lettuce:webdav] mkdir", log.String("name", name), log.String("perm", mode.String()))
 
 	if !w.isDir(ctx, filepath.Dir(name), "mkdir") {
 		return gofs.ErrNotExist
@@ -71,14 +71,14 @@ func (w *WebDAV) Mkdir(ctx context.Context, name string, mode os.FileMode) error
 		return gofs.ErrExist
 	}
 
-	if _, err := mkdirAll(ctx, w.weed, name, mode); err != nil {
+	if _, err := mkdirAll(ctx, w.let, name, mode); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (w *WebDAV) OpenFile(ctx context.Context, name string, flag int, mode os.FileMode) (webdav.File, error) {
-	log.Debug("[seaweedfs:webdav] openFile",
+	log.Debug("[lettuce:webdav] openFile",
 		log.String("name", name),
 		log.Int("flag", flag),
 		log.String("perm", mode.String()))
@@ -88,7 +88,7 @@ func (w *WebDAV) OpenFile(ctx context.Context, name string, flag int, mode os.Fi
 		return nil, gofs.ErrNotExist
 	}
 
-	f, err := open(ctx, w.weed, name, flag, mode)
+	f, err := open(ctx, w.let, name, flag, mode)
 	if err != nil {
 		if errors.Is(err, gofs.ErrNotExist) {
 			return nil, gofs.ErrNotExist
@@ -99,18 +99,18 @@ func (w *WebDAV) OpenFile(ctx context.Context, name string, flag int, mode os.Fi
 }
 
 func (w *WebDAV) Rename(ctx context.Context, oldName string, newName string) error {
-	log.Debug("[seaweedfs:webdav] rename", log.String("old_name", oldName), log.String("new_name", newName))
+	log.Debug("[lettuce:webdav] rename", log.String("old_name", oldName), log.String("new_name", newName))
 
-	if err := rename(ctx, w.weed, resolve(oldName), resolve(newName)); err != nil {
+	if err := rename(ctx, w.let, resolve(oldName), resolve(newName)); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (w *WebDAV) RemoveAll(ctx context.Context, name string) error {
-	log.Debug("[seaweedfs:webdav] removeAll", log.String("name", name))
+	log.Debug("[lettuce:webdav] removeAll", log.String("name", name))
 
-	if err := removeAll(ctx, w.weed, resolve(name)); err != nil {
+	if err := removeAll(ctx, w.let, resolve(name)); err != nil {
 		if !errors.Is(err, gofs.ErrNotExist) {
 			return err
 		}
@@ -119,7 +119,7 @@ func (w *WebDAV) RemoveAll(ctx context.Context, name string) error {
 }
 
 func (w *WebDAV) Stat(ctx context.Context, name string) (os.FileInfo, error) {
-	log.Debug("[seaweedfs:webdav] stat", log.String("name", name))
+	log.Debug("[lettuce:webdav] stat", log.String("name", name))
 
 	e, err := w.stat(ctx, resolve(name), "stat")
 	if err != nil {
@@ -139,14 +139,14 @@ func (w *WebDAV) isDir(ctx context.Context, name string, op string) bool {
 }
 
 func (w *WebDAV) stat(ctx context.Context, name string, op string) (*fs.Entry, error) {
-	log.Debug("[seaweedfs:webdav] stat", log.String("name", name), log.String("op", op))
+	log.Debug("[lettuce:webdav] stat", log.String("name", name), log.String("op", op))
 
-	fe, err := stat(ctx, w.weed, name)
+	fe, err := stat(ctx, w.let, name)
 	if err != nil {
 		return nil, err
 	}
 
-	e, err := FSEntry(w.weed, fe)
+	e, err := FSEntry(w.let, fe)
 	if err != nil {
 		return nil, err
 	}

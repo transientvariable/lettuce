@@ -12,11 +12,11 @@ import (
 
 	"github.com/transientvariable/anchor/net/http"
 	"github.com/transientvariable/hold"
+	"github.com/transientvariable/lettuce/support"
 	"github.com/transientvariable/log-go"
 
 	"github.com/valyala/bytebufferpool"
 
-	weedsprt "github.com/transientvariable/lettuce/support"
 	gohttp "net/http"
 )
 
@@ -278,8 +278,8 @@ func (r *Reader) get(ctx context.Context, c Chunk) (*bytebufferpool.ByteBuffer, 
 	}
 
 	b := acquireByteBuffer()
-	buf := weedsprt.AcquireBufferN(int(r.chunks.ChunkSizeMax()))
-	defer weedsprt.ReleaseBuffer(buf)
+	buf := support.AcquireBufferN(int(r.chunks.ChunkSizeMax()))
+	defer support.ReleaseBuffer(buf)
 
 	w, err := io.CopyBuffer(b, resp.Body, buf)
 	if err != nil {
