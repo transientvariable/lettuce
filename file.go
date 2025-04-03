@@ -370,7 +370,6 @@ func (f *File) finalize() error {
 	if f.writer != nil {
 		err = errors.Join(err, f.writer.Close())
 		if f.wOff > 0 {
-			//sort.Stable(f.entry.Chunks())
 			err = errors.Join(err, f.let.cluster.Filer().Update(f.ctx, f.entry))
 		}
 	}

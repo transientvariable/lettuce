@@ -1,0 +1,113 @@
+# ================================================
+# Lettuce Configuration
+# ================================================
+
+# Property values that use the placeholder syntax `${ ... }` are resolved via environment variables. For examples, on a
+# POSIX system, the following variable could be defined in `.bashrc`, `.profile`, `.bash_profile`, or via the command
+# line:
+#
+#   export FOO="bar"
+#
+# which could then be referenced by value:
+#
+#   some-application-property: ${FOO}
+#
+# At runtime, the value for `some-application-property` would be `bar`.
+#
+# The pipe `|` symbol can be used within a placeholder to specify a default value if an environment variable cannot be
+# resolved. For examples:
+#
+#   required-application-property: ${DOES_NOT_EXIST | baz}
+#
+# At runtime, the value for `required-application-property` would be `baz` if the environment variable `DOES_NOT_EXIST`
+# was not set.
+
+config:
+
+  # General application configuration.
+  application:
+
+    # Sets the name of the application.
+    name: Lettuce
+
+    # Sets the application version.
+    version: v0.1.0
+
+  lettuce:
+
+    client:
+
+      grpc:
+
+        keepAlive:
+
+          # Sets the maximum idle time for clients before sending pings to a server to see if the transport is still
+          # alive. If set below 10s, a minimum value of 10s will be used instead. Default: unlimited.
+          time: ${LET_CLIENT_GRPC_KEEPALIVE_TIME | 30s}
+
+          # Sets the maximum time for clients to wait for a response after pinging a server. If no response is received
+          # after the timeout period expires, the connection is closed. Default: 20 seconds.
+          timeout: ${LET_CLIENT_GRPC_KEEPALIVE_TIMEOUT | 20s}
+
+          # Sets whether clients should send keep-alive pings. If set to `true` pings will be sent even with no active
+          # RPCs. Otherwise, when there are no active RPCs, the properties `<root>.lettuce.client.grpc.keepAlive.time`
+          # and `<root>.lettuce.grpc.keepAlive.timeout` will be ignored, and no keepalive pings will be sent.
+          # Default: false.
+          permitWithoutStream: ${LET_CLIENT_GRPC_KEEPALIVE_PERMIT_WITHOUT_STREAM | true}
+
+        # Defines the max message sizes for gRPC calls.
+        messageSizeMax:
+
+          # Sets the maximum message size in bytes the gRPC client can receive. Default: 4MiB.
+          #
+          # The value must be an unsigned sequence of decimal numbers followed by a size unit suffix in SI or IEC
+          # standard units.
+          #
+          # Examples:
+          #   SI:  512 kb, 5Mb
+          #   IEC: 512 KiB, 5MiB
+          #
+          receive: ${LET_CLIENT_GRPC_MSG_SIZE_MAX_RECEIVE | 1GiB}
+
+          # Sets the maximum message size in bytes the gRPC client can send. Default: 4MiB.
+          #
+          # The value must be an unsigned sequence of decimal numbers followed by a size unit suffix in SI or IEC
+          # standard units.
+          #
+          # Examples:
+          #   SI:  512 kb, 5Mb
+          #   IEC: 512 KiB, 5MiB
+          #
+          send: ${LET_CLIENT_GRPC_MSG_SIZE_MAX_SEND | 1GiB}
+
+        security:
+
+          # gRPC Transport Layer Security (TLS) configuration.
+          tls:
+
+            # Sets whether to enable TLS for gRPC connections.
+            enable: ${LET_CLIENT_GRPC_SECURITY_TLS_ENABLE | false}
+
+            # Sets the path to the TLS public certificate file for gRPC. This configuration setting will be ignored if
+            # `<root>.lettuce.client.grpc.tls.enable` is set to `false`.
+            certFile: ${LET_CLIENT_GRPC_SECURITY_TLS_CERT_FILE | }
+
+            # Sets the path to the TLS certificate private key file for gRPC. This configuration setting will be ignored
+            # if `<root>.lettuce.client.grpc.tls.enable` is set to `false`.
+            keyFile: ${LET_CLIENT_GRPC_SECURITY_TLS_KEY_FILE | }
+
+    seaweedfs:
+
+      cluster:
+
+        local: ${LET_SEAWEEDFS_CLUSTER_LOCAL | }
+
+        filer:
+
+          # Sets the HTTP address for the SeaweedFS filer server.
+          address: ${LET_SEAWEEDFS_CLUSTER_FILER_ADDR | http://lettuce-filer:8888}
+
+        master:
+
+          # Sets the HTTP address for the SeaweedFS master server.
+          address: ${LET_SEAWEEDFS_CLUSTER_MASTER_ADDR | http://lettuce-master:9333}

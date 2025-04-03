@@ -35,5 +35,63 @@ Go file system interface implementation for link:https://github.com/seaweedfs/se
 ❯ go get -u github.com/transientvariable/lettuce
 ----
 
+== Usage
+
+.Basic File Operations
+[source%nowrap,go]
+----
+package main
+
+import (
+	"io/fs"
+
+	"github.com/transientvariable/lettuce"
+	"github.com/transientvariable/log-go"
+)
+
+func main() {
+	fileName := "pirate-ships.txt"
+
+	// Create new Lettuce instance with default options.
+	fsys, err := lettuce.New()
+	if err != nil {
+		log.Fatal("[main]", log.Err(err))
+	}
+
+	// Create a file object.
+	log.Info("[main] creating file", log.String("name", fileName))
+	f, err := fsys.Create(fileName)
+	defer func(f fs.File) {
+		if err := f.Close(); err != nil {
+			log.Error("[main]", log.Err(err))
+		}
+	}(f)
+	if err != nil {
+		log.Fatal("[main]", log.Err(err))
+	}
+
+	// Use standard lib (io/fs) to retrieve a file object status using lettuce as the file system implementation.
+	fi, err := fs.Stat(fsys, fileName)
+	if err != nil {
+		log.Fatal("[main]", log.Err(err))
+	}
+	log.Info("[main] file status", log.String("name", fi.Name()), log.Int64("size", fi.Size()))
+
+	// Write data to file object.
+	n, err := f.Write([]byte("The quick brown fox jumps over the lazy dog\n"))
+	if err != nil {
+		log.Fatal("[main]", log.Err(err))
+	}
+	log.Info("[main] completed writing", log.String("name", fi.Name()), log.Int("bytes_written", n))
+
+	// Retrieve file status again to show updated size.
+	fi, err = fs.Stat(fsys, fileName)
+	if err != nil {
+		log.Fatal("[main]", log.Err(err))
+	}
+	log.Info("[main] file status (updated)", log.String("name", fi.Name()), log.Int64("size", fi.Size()))
+}
+----
+
 == License
 This project is licensed under the link:LICENSE[MIT License].

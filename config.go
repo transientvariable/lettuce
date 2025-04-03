@@ -105,44 +105,4 @@ const (
 	//
 	// String: <root>.lettuce.seaweedfs.cluster.master.address
 	SeaweedFSClusterMasterAddr = SeaweedFSClusterMaster + ".address"
-
-	// SeaweedFSWatcher configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.
-	SeaweedFSWatcher = seaweedFS + ".watcher"
-
-	// SeaweedFSWatcherEnable configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.enable
-	SeaweedFSWatcherEnable = SeaweedFSWatcher + ".enable"
-
-	// SeaweedFSWatcherNamespaceExcludes configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.namespace.excludes
-	SeaweedFSWatcherNamespaceExcludes = SeaweedFSWatcher + ".namespace.excludes"
-
-	// SeaweedFSWatcherTimeOffsetBegin configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.timeOffset.begin
-	SeaweedFSWatcherTimeOffsetBegin = SeaweedFSWatcher + ".timeOffset.begin"
-
-	// SeaweedFSWatcherTimeOffsetEnd configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.timeOffset.end
-	SeaweedFSWatcherTimeOffsetEnd = SeaweedFSWatcher + ".timeOffset.end"
-
-	// SeaweedFSWatcherSubscription configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.subscription
-	SeaweedFSWatcherSubscription = SeaweedFSWatcher + ".subscription"
-
-	// SeaweedFSWatcherWriterChunkBufferSize configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.writer.chunkBufferSize
-	SeaweedFSWatcherWriterChunkBufferSize = SeaweedFSWatcher + ".writer.chunkBufferSize"
-
-	// SeaweedFSWatcherWriterConcurrency configuration Path.
-	//
-	// String: <root>.lettuce.seaweedfs.watcher.writer.concurrency
-	SeaweedFSWatcherWriterConcurrency = SeaweedFSWatcher + ".writer.concurrency"
 )
