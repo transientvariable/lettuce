@@ -52,14 +52,14 @@ import (
 func main() {
 	fileName := "pirate-ships.txt"
 
-	// Create new Lettuce instance with default options.
 	fsys, err := lettuce.New()
 	if err != nil {
 		log.Fatal("[main]", log.Err(err))
 	}
 
 	// Create a file object.
-	log.Info("[main] creating file", log.String("name", fileName))
+	log.Info("[main] creating file",
+		log.String("name", fileName))
 	f, err := fsys.Create(fileName)
 	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
@@ -70,27 +70,35 @@ func main() {
 		log.Fatal("[main]", log.Err(err))
 	}
 
-	// Use standard lib (io/fs) to retrieve a file object status using lettuce as the file system implementation.
+	// Use standard lib (io/fs) to retrieve a file object status using lettuce
+	// as the file system implementation.
 	fi, err := fs.Stat(fsys, fileName)
 	if err != nil {
 		log.Fatal("[main]", log.Err(err))
 	}
-	log.Info("[main] file status", log.String("name", fi.Name()), log.Int64("size", fi.Size()))
+	log.Info("[main] file status",
+		log.String("name", fi.Name()),
+		log.Int64("size", fi.Size()))
 
 	// Write data to file object.
 	n, err := f.Write([]byte("The quick brown fox jumps over the lazy dog\n"))
 	if err != nil {
 		log.Fatal("[main]", log.Err(err))
 	}
-	log.Info("[main] completed writing", log.String("name", fi.Name()), log.Int("bytes_written", n))
+	log.Info("[main] completed writing",
+		log.String("name", fi.Name()),
+		log.Int("bytes_written", n))
 
 	// Retrieve file status again to show updated size.
 	fi, err = fs.Stat(fsys, fileName)
 	if err != nil {
 		log.Fatal("[main]", log.Err(err))
 	}
-	log.Info("[main] file status (updated)", log.String("name", fi.Name()), log.Int64("size", fi.Size()))
+	log.Info("[main] file status (updated)",
+		log.String("name", fi.Name()),
+		log.Int64("size", fi.Size()))
 }
+
 ----
 
 == License
