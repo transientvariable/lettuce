@@ -70,8 +70,9 @@ func main() {
 		log.Fatal("[main]", log.Err(err))
 	}
 
-	// Use standard lib (io/fs) to retrieve a file object status using lettuce
-	// as the file system implementation.
+	// Use standard lib (io/fs) to retrieve a file
+	// object status using lettuce as the file system
+	// implementation.
 	fi, err := fs.Stat(fsys, fileName)
 	if err != nil {
 		log.Fatal("[main]", log.Err(err))
@@ -81,7 +82,7 @@ func main() {
 		log.Int64("size", fi.Size()))
 
 	// Write data to file object.
-	n, err := f.Write([]byte("The quick brown fox jumps over the lazy dog\n"))
+	n, err := f.Write([]byte(`The quick brown fox jumps over the lazy dog\n`))
 	if err != nil {
 		log.Fatal("[main]", log.Err(err))
 	}

@@ -11,11 +11,11 @@ require (
 	github.com/transientvariable/anchor v0.0.0-20250331040147-31a7b773ebd9
 	github.com/transientvariable/config-go v0.0.0-20250331030513-ea344f70c2d2
 	github.com/transientvariable/fs-go v0.0.0-20250329034002-dfdd2027de5e
-	github.com/transientvariable/hold v0.0.0-20250331031347-7b2bd26bc180
+	github.com/transientvariable/hold v0.0.0-20250403225100-7890a6369e0f
 	github.com/transientvariable/log-go v0.0.0-20250331030700-56e504a9bfbc
 	github.com/valyala/bytebufferpool v1.0.0
 	golang.org/x/net v0.38.0
-	google.golang.org/grpc v1.71.0
+	google.golang.org/grpc v1.71.1
 	google.golang.org/protobuf v1.36.6
 )
 
