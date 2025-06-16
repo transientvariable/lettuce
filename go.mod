@@ -9,7 +9,7 @@ require (
 	github.com/libp2p/go-buffer-pool v0.1.0
 	github.com/stretchr/testify v1.10.0
 	github.com/transientvariable/anchor v0.0.0-20250331040147-31a7b773ebd9
-	github.com/transientvariable/config-go v1.0.0
+	github.com/transientvariable/config-go v1.0.1
 	github.com/transientvariable/fs-go v0.0.0-20250411022114-7765c9eadc32
 	github.com/transientvariable/hold v0.0.0-20250409015808-249cfe1ee5c6
 	github.com/transientvariable/log-go v0.0.0-20250616044854-36c70c8bebc7
