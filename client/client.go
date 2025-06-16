@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/transientvariable/anchor/net/grpc"
-	"github.com/transientvariable/config-go"
-	"github.com/transientvariable/lettuce"
+	"github.com/transientvariable/config-go/pkg"
 	"github.com/transientvariable/log-go"
 
 	"github.com/cenkalti/backoff/v4"
 
+	ltconfig "github.com/transientvariable/lettuce/config"
 	gogrpc "google.golang.org/grpc"
 )
 
@@ -56,15 +56,15 @@ func NewClientConn(client Client) (*gogrpc.ClientConn, error) {
 		log.String("target", addr))
 
 	grpcOpts := []func(*grpc.Option){
-		grpc.WithKeepAlivePermitWithoutStream(config.BoolMustResolve(lettuce.GRPCKeepAlivePermitWithoutStream)),
-		grpc.WithMessageSizeMaxReceive(config.SizeMustResolve(lettuce.GRPCMessageSizeMaxReceive)),
-		grpc.WithMessageSizeMaxSend(config.SizeMustResolve(lettuce.GRPCMessageSizeMaxSend)),
-		grpc.WithMinKeepAliveTime(config.DurationMustResolve(lettuce.GRPCKeepAliveTime)),
-		grpc.WithMaxKeepAliveTimeout(config.DurationMustResolve(lettuce.GRPCKeepAliveTimeout)),
-		grpc.WithSOCKS5Enabled(config.BoolMustResolve(lettuce.SOCKS5Enable)),
-		grpc.WithTLSCertFilePath(config.ValueMustResolve(lettuce.GRPCSecurityTLSCertFile)),
-		grpc.WithTLSKeyFilePath(config.ValueMustResolve(lettuce.GRPCSecurityTLSKeyFile)),
-		grpc.WithTLSEnabled(config.BoolMustResolve(lettuce.GRPCSecurityTLSEnable)),
+		grpc.WithKeepAlivePermitWithoutStream(config.BoolMustResolve(ltconfig.GRPCKeepAlivePermitWithoutStream)),
+		grpc.WithMessageSizeMaxReceive(config.SizeBytesMustResolve(ltconfig.GRPCMessageSizeMaxReceive)),
+		grpc.WithMessageSizeMaxSend(config.SizeBytesMustResolve(ltconfig.GRPCMessageSizeMaxSend)),
+		grpc.WithMinKeepAliveTime(config.DurationMustResolve(ltconfig.GRPCKeepAliveTime)),
+		grpc.WithMaxKeepAliveTimeout(config.DurationMustResolve(ltconfig.GRPCKeepAliveTimeout)),
+		grpc.WithSOCKS5Enabled(config.BoolMustResolve(ltconfig.SOCKS5Enable)),
+		grpc.WithTLSCertFilePath(config.ValueMustResolve(ltconfig.GRPCSecurityTLSCertFile)),
+		grpc.WithTLSKeyFilePath(config.ValueMustResolve(ltconfig.GRPCSecurityTLSKeyFile)),
+		grpc.WithTLSEnabled(config.BoolMustResolve(ltconfig.GRPCSecurityTLSEnable)),
 	}
 
 	var conn *gogrpc.ClientConn
@@ -89,7 +89,7 @@ func EncodeAddrs(addrs ...url.URL) []url.URL {
 
 // EncodeAddr ...
 func EncodeAddr(addr url.URL) url.URL {
-	local, err := config.Bool(lettuce.SeaweedFSClusterLocal)
+	local, err := config.Bool(ltconfig.SeaweedFSClusterLocal)
 	if err != nil {
 		local = false
 	}

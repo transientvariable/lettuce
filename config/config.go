@@ -1,4 +1,4 @@
-package lettuce
+package config
 
 const (
 	// clientGRPC configuration path.
